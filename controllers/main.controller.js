@@ -88,7 +88,8 @@ export const getPinnedRepos = async (req, res, next) => {
 				}
 				const stars = getStars($, el)
 				const forks = getForks($, el)
-
+				const topics = await getTopics(repo)
+			
 				pinnedRepos[index] = {
 					name,
 					repo,
@@ -96,7 +97,8 @@ export const getPinnedRepos = async (req, res, next) => {
 					demo,
 					language,
 					stars: stars ? convertHumanReadableNumber(stars) : 0,
-					forks: forks ? convertHumanReadableNumber(forks) : 0
+					forks: forks ? convertHumanReadableNumber(forks) : 0,
+					topics: topics
 				}
 			}
 
@@ -209,4 +211,17 @@ const convertHumanReadableNumber = humanReadableNumber => {
 	const multiplier = units[unit?.toLowerCase()] || 1
 
 	return parseFloat(numberPart) * multiplier
+}
+
+const getTopics = async (repo) => {
+    try {
+        const html = await axios(repo)
+        const $ = cheerio.load(html.data)
+        const topicLinks = $('a[data-ga-click="Topic, repository page"]').toArray()
+        const topics = topicLinks.map(link => $(link).text().trim())
+        return topics
+    } catch (error) {
+        console.error("Error getting topics:", error)
+        return []
+    }
 }
