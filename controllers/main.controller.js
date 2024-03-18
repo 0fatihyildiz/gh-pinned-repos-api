@@ -88,6 +88,7 @@ export const getPinnedRepos = async (req, res, next) => {
 				}
 				const stars = getStars($, el)
 				const forks = getForks($, el)
+				const image = getImage(repo)
 				const topics = await getTopics(repo)
 			
 				pinnedRepos[index] = {
@@ -96,9 +97,10 @@ export const getPinnedRepos = async (req, res, next) => {
 					description,
 					demo,
 					language,
+					image,
+					topics,
 					stars: stars ? convertHumanReadableNumber(stars) : 0,
 					forks: forks ? convertHumanReadableNumber(forks) : 0,
-					topics: topics
 				}
 			}
 
@@ -224,4 +226,10 @@ const getTopics = async (repo) => {
         console.error("Error getting topics:", error)
         return []
     }
+}
+
+const getImage = (repo) => {
+	const repoAndOwnerName = repo.split('/')
+
+	return `https://opengraph.githubassets.com/a/${repoAndOwnerName.at(-2)}/${repoAndOwnerName.at(-1)}`
 }
